@@ -38,13 +38,13 @@
 %%
 %%   - ver: "1"
 %%
-%%   - Bits: the Bits of MSB collisioned to be 0
+%%   - Bits: the Bits of MSB collided to be 0
 %%
-%%   - Time: UTC time: YYYYMMDDhhmmss
+%%   - Time: UTC time YYYYMMDDhhmmss
 %%
 %%   - Res: input Resource if it's short (less than 32 bytes) and printable, or the sha hash digest of Resource
 %%
-%%   - Offset: allowed differernt in seconds when verifying in the future
+%%   - Offset: allowed differece in seconds when verifying in the future
 %%
 %% @end
 -spec generate(
