@@ -1,0 +1,15 @@
+{application, p2p,
+ [
+  {description, "An Erlang p2p library"},
+  {vsn, "1"},
+  {modules, [
+             hashticket
+            ]},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  crypto
+                 ]},
+  {env, []}
+ ]}.
