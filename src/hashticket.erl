@@ -44,7 +44,7 @@
 %%
 %%   - Res: input Resource if it's short (less than 32 bytes) and printable, or the sha hash digest of Resource
 %%
-%%   - Offset: allowed differece in seconds when verifying in the future
+%%   - Offset: allowed difference in seconds when verifying in the future
 %%
 %% @end
 -spec generate(
