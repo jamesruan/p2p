@@ -1,4 +1,3 @@
-%% Hashticket, an hashcash v1 like proof-of-work algorithm
 %% Copyright (C) 2015 James Ruan <ruanbeihong@gmail.com>
 %%
 %% This program is free software; you can redistribute it and/or modify
@@ -14,24 +13,39 @@
 %% You should have received a copy of the GNU General Public License along
 %% with this program; if not, write to the Free Software Foundation, Inc.,
 %% 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+%% -----------------------------------------------------------------------------
+%% @author James Ruan <ruanbeihong@gmail.com>
+%% @doc
+%% Hashticket: a hashcash v1 like proof-of-work algorithm
+%%
+%% @end
+%% -----------------------------------------------------------------------------
 
 -module(hashticket).
+-author('James Ruan').
+-vsn({0,1,0}).
 
 -export([generate/3, generate/2, verify/1]).
 
 -type stamp() :: bitstring().
 
 %% @doc Generate a stamp.
-%% <pre>
-%%   format is:
-%%   ver:Bits:Time:Res:Offset:Rand:Count
-%%   where:
-%%   ver: "1"
-%%   Bits: the Bits of MSB collisioned to be 0
-%%   Time: UTC time: YYYYMMDDhhmmss
-%%   Res: intput Resource if it's short (32 bytes) and printable, or the sha hash digest of Resource
-%%   Offset: allowed differernt in seconds when verifying in the future
-%% </pre>
+%% format is:
+%%
+%%   ``ver:Bits:Time:Res:Offset:Rand:Count''
+%%
+%% where
+%%
+%%   - ver: "1"
+%%
+%%   - Bits: the Bits of MSB collisioned to be 0
+%%
+%%   - Time: UTC time: YYYYMMDDhhmmss
+%%
+%%   - Res: input Resource if it's short (less than 32 bytes) and printable, or the sha hash digest of Resource
+%%
+%%   - Offset: allowed differernt in seconds when verifying in the future
+%%
 %% @end
 -spec generate(
 	Resource :: iolist(),
