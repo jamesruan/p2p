@@ -10,7 +10,7 @@ clean:
 	rebar -C rebar.conf clean
 
 test:
-	rebar -C rebar.rebar compile eunit
+	rebar -C rebar.conf compile eunit
 
 install: build
 	mkdir -p ${ERL_ROOT}/lib/p2p/ebin
