@@ -1,53 +1,72 @@
--module(gen_cache).
-
--export([new/2, query/2, cache/3, flush/1]).
--export_type([cache/0]).
-
--opaque cache() :: #{module => module(), state => term()}.
-
--type rw() :: read | write.
-
+%% Copyright (C) 2015 James Ruan <ruanbeihong@gmail.com>
+%%
+%% This program is free software; you can redistribute it and/or modify
+%% it under the terms of the GNU General Public License as published by
+%% the Free Software Foundation; either version 2 of the License, or
+%% (at your option) any later version.
+%%
+%% This program is distributed in the hope that it will be useful,
+%% but WITHOUT ANY WARRANTY; without even the implied warranty of
+%% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%% GNU General Public License for more details.
+%%
+%% You should have received a copy of the GNU General Public License along
+%% with this program; if not, write to the Free Software Foundation, Inc.,
+%% 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+%% -----------------------------------------------------------------------------
+%% @author James Ruan <ruanbeihong@gmail.com>
 %% @doc
+%% gen_cache: generic cache module.
+%% <pre>
 %% new/2         init/1
 %% query/2       handle_lookup/3, handle_touch/3
 %% cache/3       handle_lookup/3, handle_insert/3, when missed
 %%               handle_lookup/3, handle_replace/3, when missed and full
 %%               handle_lookup/3, handle_update/3 or handle_touch/3, when hit
 %% flush/1       handle_reset/1
+%% </pre>
 %% @end
+%% -----------------------------------------------------------------------------
+-module(gen_cache).
+-author('James Ruan').
+-vsn({0,1,0}).
 
-%% @doc initiation.
-%% @end
--callback init(Args :: #{}) -> State :: term().
+-export([new/2, query/2, cache/3, flush/1]).
+-export_type([cache/0, rw/0]).
 
-%% @doc clean the data but hold the configuration.
-%% @end
--callback reset(State :: term()) -> NState :: term().
 
-%% @doc try hit the cache for read, read only.
-%% @end
--callback handle_lookup(Key :: term(), RW :: rw(), State :: term()) ->
+-opaque cache() :: #{module => module(), state => term()}.
+
+-type rw() :: read | write.
+-type state() :: term().
+
+%% initiation.
+-callback init(Args :: #{}) -> State :: state().
+
+%% clean the data but hold the configuration.
+-callback reset(State :: state()) -> NState :: state().
+
+%% try hit the cache for read, read only.
+-callback handle_lookup(Key :: term(), RW :: rw(), State :: state()) ->
 	none |
 	{none, Full :: boolean()} |
 	{ok, Value :: term()} |
 	{ok, Value :: term(), Full :: boolean()}.
 
-%% @doc update cache when read is hit.
-%% @end
--callback handle_touch(Key :: term(), RW :: rw(), State :: term()) -> NState :: term().
+%% update cache when read is hit.
+-callback handle_touch(Key :: term(), RW :: rw(), State :: state()) -> NState :: state().
 
-%% @doc write cache when write is not hit.
-%% @end
--callback handle_insert(Key :: term(), Value :: term(), State :: term()) -> NState :: term().
+%% write cache when write is not hit.
+-callback handle_insert(Key :: term(), Value :: term(), State :: state()) -> NState :: state().
 
-%% @doc write cache when write is hit.
-%% @end
--callback handle_update(Key :: term(), Value :: term(), State :: term()) -> NState :: term().
+%% write cache when write is hit.
+-callback handle_update(Key :: term(), Value :: term(), State :: state()) -> NState :: state().
 
-%% @doc replace cache line when write is hit but cache is full
-%% @end
--callback handle_replace(Key :: term(), Value :: term(), State :: term()) -> NState :: term().
+%% replace cache line when write is hit but cache is full
+-callback handle_replace(Key :: term(), Value :: term(), State :: state()) -> NState :: state().
 
+%% @doc create a new cache initialized with `Args'.
+%% @end
 -spec new(
 	Mod :: module(),
 	Args :: #{}
@@ -56,12 +75,16 @@ new(Mod, Args) ->
 	State = Mod:init(Args),
 	#{module => Mod, state => State}.
 
+%% @doc flush a cache by clean its data while preserving its configuration.
+%% @end
 -spec flush(Cache :: cache()) -> NCache :: cache().
 flush(Cache) ->
 	Mod = maps:get(module, Cache),
 	State = maps:get(state, Cache),
 	Cache#{state := Mod:reset(State)}.
 
+%% @doc find an item in cache, and update its internal structure.
+%% @end
 -spec query(
 	Key :: term(),
 	Cache :: cache()) -> none | {Value :: term(), NCache :: cache()}.
@@ -76,6 +99,8 @@ query(Key, Cache) ->
 		{Value, Cache#{state := NState}}
 	end.
 
+%% @doc put an item into cache, and update its internal structure.
+%% @end
 -spec cache(
 	Key :: term(),
 	Value :: term(),
