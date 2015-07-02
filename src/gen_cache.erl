@@ -16,15 +16,15 @@
 %% flush/1       handle_reset/1
 %% @end
 
-%% @doc initiation
+%% @doc initiation.
 %% @end
 -callback init(Args :: #{}) -> State :: term().
 
-%% @doc clean the data but hold the configuration
+%% @doc clean the data but hold the configuration.
 %% @end
 -callback reset(State :: term()) -> NState :: term().
 
-%% @doc try hit the cache for read, read only
+%% @doc try hit the cache for read, read only.
 %% @end
 -callback handle_lookup(Key :: term(), RW :: rw(), State :: term()) ->
 	none |
@@ -32,15 +32,15 @@
 	{ok, Value :: term()} |
 	{ok, Value :: term(), Full :: boolean()}.
 
-%% @doc update cache when read is hit
+%% @doc update cache when read is hit.
 %% @end
 -callback handle_touch(Key :: term(), RW :: rw(), State :: term()) -> NState :: term().
 
-%% @doc write cache when write is not hit
+%% @doc write cache when write is not hit.
 %% @end
 -callback handle_insert(Key :: term(), Value :: term(), State :: term()) -> NState :: term().
 
-%% @doc write cache when write is hit
+%% @doc write cache when write is hit.
 %% @end
 -callback handle_update(Key :: term(), Value :: term(), State :: term()) -> NState :: term().
 

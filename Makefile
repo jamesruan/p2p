@@ -16,7 +16,7 @@ test:
 doc:
 	rebar -C rebar.conf doc
 
-install: build
+install: build doc
 	mkdir -p ${ERL_ROOT}/lib/p2p/ebin
 	mkdir -p ${ERL_ROOT}/lib/p2p/include
 	install -m0644 ebin/* ${ERL_ROOT}/lib/p2p/ebin
@@ -25,4 +25,4 @@ install: build
 uninstall:
 	rm -rf ${ERL_ROOT}/lib/p2p
 
-.PHONY: all build test install uninstall
+.PHONY: all build test doc install uninstall
