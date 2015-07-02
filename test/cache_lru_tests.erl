@@ -4,39 +4,38 @@
 setup_test() ->
 	Args = #{size => 4},
 	Cache = cache_lru:new(Args),
-	?assertMatch(Args, maps:get(args, Cache)),
-	?assertMatch(cache_lru, maps:get(module, Cache)).
+	State = maps:get(state, Cache),
+	?assertMatch(cache_lru, maps:get(module, Cache)),
+	?assertMatch(Args, maps:get(args, State)).
 
 get_put_test() ->
 	Args = #{size => 4},
 	Cache = cache_lru:new(Args),
 	{Key, Value} = {1, "1"},
-	{ok, NCache} = gen_cache:put(Key, Value, Cache),
+	NCache = gen_cache:cache(Key, Value, Cache),
 	?assertNotMatch(NCache, Cache),
-	?assertMatch({Value, _}, gen_cache:get(Key, NCache)),
-	?assertMatch(none, gen_cache:getLine(2, NCache)).
+	?assertMatch({Value, _}, gen_cache:query(Key, NCache)),
+	?assertMatch(none, gen_cache:query(2, NCache)).
 
 hit_update_reset_test() -> 
 	Args = #{size => 4},
 	Cache = cache_lru:new(Args),
 	{Key, Value} = {1, "1"},
-	{ok, NCache} = gen_cache:put(Key, Value, Cache),
-	{_ , N2Cache} = gen_cache:get(Key, NCache),
+	NCache = gen_cache:cache(Key, Value, Cache),
+	{Value, N2Cache} = gen_cache:query(Key, NCache),
 	?assertNotMatch(N2Cache, NCache),
-	N3Cache = gen_cache:empty(N2Cache),
-	?assertMatch(N3Cache, Cache),
-	NValue = "2",
-	{ok, N4Cache} = gen_cache:putLine({Key, NValue}, NCache),
-	?assertNotMatch(N4Cache, N2Cache),
-	?assertMatch({{Key, NValue}, _ }, gen_cache:getLine(Key, N4Cache)).
+	N3Cache = gen_cache:cache(Key, Value, N2Cache),
+	N4Cache = gen_cache:cache(Key, "2", N3Cache),
+	N5Cache = gen_cache:flush(N4Cache),
+	?assertMatch(N5Cache, Cache).
 
 fulldrop_test() ->
 	Args = #{size => 4},
 	Cache = cache_lru:new(Args),
-	{ok, NCache} = gen_cache:put(1, "1", Cache),
-	{ok, N2Cache} = gen_cache:put(2, "2", NCache),
-	{ok, N3Cache} = gen_cache:put(3, "3", N2Cache),
-	{ok, N4Cache} = gen_cache:put(4, "4", N3Cache),
-	{ok, N5Cache} = gen_cache:put(5, "5", N4Cache),
-	?assertMatch(none, gen_cache:getLine(1, N5Cache)),
-	?assertMatch({"5", _}, gen_cache:get(5, N5Cache)).
+	NCache  = gen_cache:cache(1, "1", Cache),
+	N2Cache = gen_cache:cache(2, "2", NCache),
+	N3Cache = gen_cache:cache(3, "3", N2Cache),
+	N4Cache = gen_cache:cache(4, "4", N3Cache),
+	N5Cache = gen_cache:cache(5, "5", N4Cache),
+	?assertMatch(none, gen_cache:query(1, N5Cache)),
+	?assertMatch({"5", _}, gen_cache:query(5, N5Cache)).

@@ -5,12 +5,16 @@ all: build
 
 build:
 	rebar -C rebar.conf compile
+	dialyzer -r ebin
 
 clean:
 	rebar -C rebar.conf clean
 
 test:
 	rebar -C rebar.conf compile eunit
+
+doc:
+	rebar -C rebar.conf doc
 
 install: build
 	mkdir -p ${ERL_ROOT}/lib/p2p/ebin

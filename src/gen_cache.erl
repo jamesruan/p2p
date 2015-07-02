@@ -1,76 +1,97 @@
 -module(gen_cache).
 
--export([new/2, empty/1, getLine/2, get/2, putLine/2, put/3]).
+-export([new/2, query/2, cache/3, flush/1]).
+-export_type([cache/0]).
 
--type cache() :: #{module => module()}.
+-opaque cache() :: #{module => module(), state => term()}.
 
--callback init(
-	Args :: #{}
-	) -> Cache :: cache().
+-type rw() :: read | write.
 
--callback reset(Cache :: cache()) -> NCache ::cache().
+%% @doc
+%% new/2         init/1
+%% query/2       handle_lookup/3, handle_touch/3
+%% cache/3       handle_lookup/3, handle_insert/3, when missed
+%%               handle_lookup/3, handle_replace/3, when missed and full
+%%               handle_lookup/3, handle_update/3 or handle_touch/3, when hit
+%% flush/1       handle_reset/1
+%% @end
 
--callback get_value_by_key(
-	Key :: term(),
-	Cache :: cache()
-	) -> none | { Value :: term(), NCache :: cache() }.
+%% @doc initiation
+%% @end
+-callback init(Args :: #{}) -> State :: term().
 
--callback put_value_by_key(
-	Key :: term(),
-	Value :: term(),
-	Cache :: cache()
-	) -> { ok, NCache :: cache() }.
+%% @doc clean the data but hold the configuration
+%% @end
+-callback reset(State :: term()) -> NState :: term().
+
+%% @doc try hit the cache for read, read only
+%% @end
+-callback handle_lookup(Key :: term(), RW :: rw(), State :: term()) ->
+	none |
+	{none, Full :: boolean()} |
+	{ok, Value :: term()} |
+	{ok, Value :: term(), Full :: boolean()}.
+
+%% @doc update cache when read is hit
+%% @end
+-callback handle_touch(Key :: term(), RW :: rw(), State :: term()) -> NState :: term().
+
+%% @doc write cache when write is not hit
+%% @end
+-callback handle_insert(Key :: term(), Value :: term(), State :: term()) -> NState :: term().
+
+%% @doc write cache when write is hit
+%% @end
+-callback handle_update(Key :: term(), Value :: term(), State :: term()) -> NState :: term().
+
+%% @doc replace cache line when write is hit but cache is full
+%% @end
+-callback handle_replace(Key :: term(), Value :: term(), State :: term()) -> NState :: term().
 
 -spec new(
 	Mod :: module(),
 	Args :: #{}
 	) -> Cache :: cache().
 new(Mod, Args) ->
-	Cache = Mod:init(Args),
-	Cache#{module => Mod}.
+	State = Mod:init(Args),
+	#{module => Mod, state => State}.
 
--spec empty(Cache :: cache()) -> NCache :: cache().
-empty(Cache) ->
+-spec flush(Cache :: cache()) -> NCache :: cache().
+flush(Cache) ->
 	Mod = maps:get(module, Cache),
-	Mod:reset(Cache).
+	State = maps:get(state, Cache),
+	Cache#{state := Mod:reset(State)}.
 
--spec getLine(
+-spec query(
 	Key :: term(),
-	Cache :: cache()
-	) ->
-	none |
-	{ {Key :: term(), Value :: term()}, NCache :: cache()}.
-getLine(Key, Cache) ->
-	case gen_cache:get(Key, Cache) of
-	none ->
+	Cache :: cache()) -> none | {Value :: term(), NCache :: cache()}.
+query(Key, Cache) ->
+	Mod = maps:get(module, Cache),
+	State = maps:get(state, Cache),
+	case Mod:handle_lookup(Key, read, State) of
+	none ->	
 		none;
-	{Value, NCache} ->
-		{ {Key, Value}, NCache}
+	{ok, Value} ->
+		NState = Mod:handle_touch(Key, read, State),
+		{Value, Cache#{state := NState}}
 	end.
 
--spec get(
-	Key :: term(),
-	Cache :: cache()
-	) ->
-	none |
-	{ Value :: term(), NCache :: cache()}.
-get(Key, Cache) ->
-	Mod = maps:get(module, Cache),
-	Mod:get_value_by_key(Key, Cache).
-	
-
--spec putLine(
-	{Key :: term(), Value :: term()},
-	Cache :: term()
-	) -> {ok, NCache :: cache()}.
-putLine( {Key, Value}, Cache) ->
-	gen_cache:put(Key, Value, Cache).
-
--spec put(
+-spec cache(
 	Key :: term(),
 	Value :: term(),
-	Cache :: term()
-	) -> {ok, NCache :: cache()}.
-put(Key, Value, Cache) ->
+	Cache :: cache()) -> NCache :: cache().
+cache(Key, Value, Cache) ->
 	Mod = maps:get(module, Cache),
-	Mod:put_value_by_key(Key, Value, Cache).
+	State = maps:get(state, Cache),
+	NState = case Mod:handle_lookup(Key, write, State) of
+	{none, true} ->
+		Mod:handle_replace(Key, Value, State);
+	{none, false} ->
+		Mod:handle_insert(Key, Value, State);
+	{ok, Value, _} ->
+		Mod:handle_touch(Key, write, State);
+	{ok, _OValue, _} ->
+		Mod:handle_update(Key, Value, State)
+	end,
+	Cache#{state := NState}.
+
