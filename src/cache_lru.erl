@@ -34,7 +34,7 @@
 
 -type rw() :: gen_cache:rw().
 -type args() :: #{size => integer()}.
--type data() :: #{kt => gb_trees:tree(), tv => gb_trees:tree()}.
+-type data() :: #{kt => gb_trees:tree(), tkv => gb_trees:tree()}.
 -type state() :: #{args => args(), data => data()}.
 
 %% @doc
