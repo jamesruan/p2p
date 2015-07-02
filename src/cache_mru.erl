@@ -16,11 +16,11 @@
 %% -----------------------------------------------------------------------------
 %% @author James Ruan <ruanbeihong@gmail.com>
 %% @doc
-%% cache_lru: a gen_cache module that implement LRU replacement policy.
+%% cache_mru: a gen_cache module that implement MRU replacement policy.
 %%
 %% @end
 %% -----------------------------------------------------------------------------
--module(cache_lru).
+-module(cache_mru).
 -author('James Ruan').
 -vsn({0,1,0}).
 

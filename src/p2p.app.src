@@ -3,7 +3,10 @@
   {description, "An Erlang p2p library"},
   {vsn, "1"},
   {modules, [
-             hashticket
+             hashticket,
+             gen_cache,
+             cache_lru,
+             cache_mru
             ]},
   {registered, []},
   {applications, [
