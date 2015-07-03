@@ -112,7 +112,7 @@ query(Key, Cache) ->
 		NState = Mod:handle_touch(Key, read, State),
 		{Value, Cache#{state := NState}}
 	end.
-	
+
 %% @doc put an item into cache, and update its internal structure.
 %% @end
 -spec cache(

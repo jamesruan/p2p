@@ -16,7 +16,7 @@
 %% -----------------------------------------------------------------------------
 %% @author James Ruan <ruanbeihong@gmail.com>
 %% @doc
-%% cache_ru: a gen_cache module that implement an one-factor min/max replacement policy.
+%% cache_of: a gen_cache module that implement an one-factor min/max replacement policy.
 %%
 %% @end
 %% -----------------------------------------------------------------------------
