@@ -93,6 +93,7 @@ verify(Stamp) ->
 %% @end
 			
 %% interal functions
+%% @private
 -spec partial_collision(
 	Res :: string(),
 	Bits :: integer(),
@@ -115,6 +116,7 @@ partial_collision(Res, Bits, Time, Offset, Rand) ->
 			partial_collision(Res, Bits, Time, Offset, Rand)
 	end.
 
+%% @private
 -spec universaltime() -> string().
 universaltime() ->
 	{Date, Time} = erlang:universaltime(),

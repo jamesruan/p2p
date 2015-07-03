@@ -15,6 +15,7 @@
 %% 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 %% -----------------------------------------------------------------------------
 %% @author James Ruan <ruanbeihong@gmail.com>
+%% @private
 %% @doc
 %% cache_of: a gen_cache module that implement an one-factor min/max replacement policy.
 %%

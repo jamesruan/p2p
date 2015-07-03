@@ -47,7 +47,7 @@ new(Args) ->
 	cache_of:new(?MODULE, #{
 		size => Size,
 		factor_args => none,
-		new_factor => fun(_,_) -> erlang:now()end,
+		new_factor => fun(_,_) -> erlang:unique_integer()end,
 		drop => min
 		}).
 
