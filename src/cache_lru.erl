@@ -24,6 +24,10 @@
 -author('James Ruan').
 -vsn({0,1,0}).
 
+-ifndef(CACHE_LRU_DEFAULT_SIZE).
+-define(CACHE_LRU_DEFAULT_SIZE, 128).
+-endif.
+
 -behaviour(gen_cache).
 -export([new/1]).
 -export([init/1, reset/1, handle_lookup/3, handle_touch/3, handle_insert/3, handle_update/3, handle_replace/3]).
@@ -40,7 +44,9 @@
 	Args :: args() | #{}
 	) -> Cache :: cache().
 new(Args) ->
-	cache_of:new(?MODULE, Args#{
+	Size = maps:get(size, Args, ?CACHE_LRU_DEFAULT_SIZE),
+	cache_of:new(?MODULE, #{
+		size => Size,
 		factor_args => none,
 		new_factor => fun(_,_) -> erlang:now()end,
 		drop => min
