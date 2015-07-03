@@ -36,8 +36,17 @@
 -type rw() :: gen_cache:rw().
 -type cache() :: gen_cache:cache().
 -type droptype() :: min | max.
+%% `min' for replace with min(Factor).
+%%
+%% `max' for replace with max(Factor).
 -type factor() :: term().
--type factor_fun() :: fun(({OFactor :: factor(), {Key:: term(), Value :: term}}, FArgs :: term()) -> factor()).
+-type factor_fun() :: fun(({OFactor :: factor(), {Key:: term(), Value :: term()}}, FArgs :: term()) -> factor()).
+%% `OFactor' old Factor.
+%%
+%% `Key' `Value' current Key and Value.
+%%
+%% `FArgs' argument for calculate a new Factor.
+
 -type args() :: #{
 	size => integer(),
 	factor_args => term(),

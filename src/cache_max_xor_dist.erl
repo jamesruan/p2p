@@ -16,16 +16,16 @@
 %% -----------------------------------------------------------------------------
 %% @author James Ruan <ruanbeihong@gmail.com>
 %% @doc
-%% cache_lru: a gen_cache module that implement LRU replacement policy.
+%% cache_max_xor_dist: a gen_cache module that implement Max-Xor-Dist replacement policy.
 %%
 %% @end
 %% -----------------------------------------------------------------------------
--module(cache_lru).
+-module(cache_max_xor_dist).
 -author('James Ruan').
 -vsn({0,1,0}).
 
--ifndef(CACHE_LRU_DEFAULT_SIZE).
--define(CACHE_LRU_DEFAULT_SIZE, 128).
+-ifndef(CACHE_MXD_DEFAULT_SIZE).
+-define(CACHE_MXD_DEFAULT_SIZE, 8).
 -endif.
 
 -behaviour(gen_cache).
@@ -35,20 +35,33 @@
 -type rw() :: gen_cache:rw().
 -type state() :: gen_cache:state().
 -type cache() :: gen_cache:cache().
--type args() :: #{size => Size :: integer()}.
-%% `Size' is max size of the cache.
+-type args() :: #{
+	size => Size :: integer(),
+	base => Base :: binary()}.
+%%`Size' is max size of the cache.
+%%
+%%`Base' is the Base Key, distance is calculated as XOR(Base Key, Key).
 
-%% @doc create a new cache.
+%% @doc create a new cache
+%%
 -spec new(
-	Args :: args() | #{}
+	Args :: args()
 	) -> Cache :: cache().
 new(Args) ->
-	Size = maps:get(size, Args, ?CACHE_LRU_DEFAULT_SIZE),
+	Size = maps:get(size, Args, ?CACHE_MXD_DEFAULT_SIZE),
+	Base = maps:get(base, Args),
 	cache_of:new(?MODULE, #{
 		size => Size,
-		factor_args => none,
-		new_factor => fun(_,_) -> erlang:now()end,
-		drop => min
+		factor_args => Base,
+		new_factor => fun({ODist, {Key, _Value}}, BKey) -> 
+			case ODist of
+			none ->
+	 	 	 	 crypto:exor(BKey, Key);
+			_ ->
+				ODist
+			end
+		end,
+		drop => max
 		}).
 
 %% callbacks:
@@ -83,4 +96,3 @@ handle_update(Key, Value, State) ->
 -spec handle_replace(Key :: term(), Value :: term(), State :: state()) -> NState :: state().
 handle_replace(Key, Value, State) ->
 	cache_of:handle_replace(Key, Value, State).
-

@@ -36,10 +36,9 @@
 -type state() :: gen_cache:state().
 -type cache() :: gen_cache:cache().
 -type args() :: #{size => integer()}.
+%% `Size' is max size of the cache.
 
-%% @doc create a new cache, return a gen_cache:cache().
-%%
-%% Args: 'size' is max size of the cache.
+%% @doc create a new cache.
 -spec new(
 	Args :: args() | #{}
 	) -> Cache :: cache().

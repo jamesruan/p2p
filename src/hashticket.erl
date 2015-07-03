@@ -35,16 +35,13 @@
 %%   ``ver:Bits:Time:Res:Offset:Rand:Count''
 %%
 %% where
-%%
-%%   - ver: "1"
-%%
-%%   - Bits: the Bits of MSB collided to be 0
-%%
-%%   - Time: UTC time YYYYMMDDhhmmss
-%%
-%%   - Res: input Resource if it's short (less than 32 bytes) and printable, or the sha hash digest of Resource
-%%
-%%   - Offset: allowed difference in seconds when verifying in the future
+%% <ul>
+%%   <li> ver: "1" </li>
+%%   <li> Bits: the Bits of MSB collided to be 0 </li>
+%%   <li> Time: UTC time YYYYMMDDhhmmss </li>
+%%   <li> Res: input `Resource' if it's short (less than 32 bytes) and printable, or the sha hash digest of `Resource' </li>
+%%   <li> Offset: allowed difference in seconds when verifying in the future </li>
+%% </ul>
 %%
 %% @end
 -spec generate(

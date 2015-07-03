@@ -6,7 +6,8 @@
              hashticket,
              gen_cache,
              cache_lru,
-             cache_mru
+             cache_mru,
+             cache_max_xor_dist
             ]},
   {registered, []},
   {applications, [
