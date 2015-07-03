@@ -1,4 +1,4 @@
 %% encoding: UTF-8
 {application,p2p}.
 {packages,[]}.
-{modules,[cache_lru,cache_mru,cache_ru,gen_cache,hashticket,p2p]}.
+{modules,[cache_lru,cache_mru,cache_of,gen_cache,hashticket,p2p]}.

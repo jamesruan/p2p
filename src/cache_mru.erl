@@ -29,25 +29,31 @@
 -export([init/1, reset/1, handle_lookup/3, handle_touch/3, handle_insert/3, handle_update/3, handle_replace/3]).
 
 -type rw() :: gen_cache:rw().
+-type state() :: gen_cache:state().
+-type cache() :: gen_cache:cache().
 -type args() :: #{size => integer()}.
--type state() :: term().
 
-%% @doc
+%% @doc create a new cache, return a gen_cache:cache().
+%%
 %% Args: 'size' is max size of the cache.
 -spec new(
 	Args :: args() | #{}
-	) -> Cache :: gen_cache:cache().
+	) -> Cache :: cache().
 new(Args) ->
-	cache_ru:new(?MODULE, Args).
+	cache_of:new(?MODULE, Args#{
+		factor_args => none,
+		new_factor => fun(_,_) -> erlang:now()end,
+		drop => max
+		}).
 
 %% callbacks:
 -spec init(Args :: #{}) -> State :: state().
 init(Args) ->
-	cache_ru:init(Args).
+	cache_of:init(Args).
 
 -spec reset(State :: state()) -> NState :: state().
 reset(State) ->
-	cache_ru:reset(State).
+	cache_of:reset(State).
 
 -spec handle_lookup(Key :: term(), RW :: rw(), State :: state()) ->
 	none |
@@ -55,21 +61,21 @@ reset(State) ->
 	{ok, Value :: term()} |
 	{ok, Value :: term(), Full :: boolean()}.
 handle_lookup(Key, RW, State) ->
-	cache_ru:handle_lookup(Key, RW, State).
+	cache_of:handle_lookup(Key, RW, State).
 
 -spec handle_touch(Key :: term(), RW :: rw(), State :: state()) -> NState :: state().
 handle_touch(Key, RW, State) ->
-	cache_ru:handle_touch(Key, RW, State).
+	cache_of:handle_touch(Key, RW, State).
 	
 -spec handle_insert(Key :: term(), Value :: term(), State :: state()) -> NState :: state().
 handle_insert(Key, Value, State) ->
-	cache_ru:handle_insert(Key, Value, State).
+	cache_of:handle_insert(Key, Value, State).
 
 -spec handle_update(Key :: term(), Value :: term(), State :: state()) -> NState :: state().
 handle_update(Key, Value, State) ->
-	cache_ru:handle_update(Key, Value, State).
+	cache_of:handle_update(Key, Value, State).
 
 -spec handle_replace(Key :: term(), Value :: term(), State :: state()) -> NState :: state().
 handle_replace(Key, Value, State) ->
-	cache_ru:handle_replace(Key, Value, State).
+	cache_of:handle_replace(Key, Value, State).
 

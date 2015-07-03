@@ -3,11 +3,8 @@
 
 setup_test() ->
 	Args = #{size => 4},
-	LRUArgs = Args#{drop => small},
 	Cache = cache_lru:new(Args),
-	State = maps:get(state, Cache),
-	?assertMatch(cache_lru, maps:get(module, Cache)),
-	?assertMatch(LRUArgs, maps:get(args, State)).
+	?assertMatch(cache_lru, maps:get(module, Cache)).
 
 get_put_test() ->
 	Args = #{size => 4},
@@ -15,8 +12,11 @@ get_put_test() ->
 	{Key, Value} = {1, "1"},
 	NCache = gen_cache:cache(Key, Value, Cache),
 	?assertNotMatch(NCache, Cache),
-	?assertMatch({Value, _}, gen_cache:query(Key, NCache)),
-	?assertMatch(none, gen_cache:query(2, NCache)).
+	{Value, N2Cache} = gen_cache:query(Key, NCache),
+	?assertNotMatch(N2Cache, NCache),
+	Value = gen_cache:lookup(Key, NCache),
+	?assertMatch(none, gen_cache:query(2, NCache)),
+	?assertMatch(none, gen_cache:lookup(2, NCache)).
 
 hit_update_reset_test() -> 
 	Args = #{size => 4},

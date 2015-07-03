@@ -31,11 +31,10 @@
 -author('James Ruan').
 -vsn({0,1,0}).
 
--export([new/2, query/2, cache/3, flush/1]).
--export_type([cache/0, rw/0]).
+-export([new/2, query/2, lookup/2, cache/3, flush/1]).
+-export_type([cache/0, rw/0, state/0]).
 
-
--opaque cache() :: #{module => module(), state => term()}.
+-opaque cache() :: #{module => module(), state => state()}.
 
 -type rw() :: read | write.
 -type state() :: term().
@@ -83,6 +82,21 @@ flush(Cache) ->
 	State = maps:get(state, Cache),
 	Cache#{state := Mod:reset(State)}.
 
+%% @doc find an item in cache without updating its internal structure.
+%% @end
+-spec lookup(
+	Key :: term(),
+	Cache :: cache()) -> none | (Value :: term()).
+lookup(Key, Cache) ->
+	Mod = maps:get(module, Cache),
+	State = maps:get(state, Cache),
+	case Mod:handle_lookup(Key, read, State) of
+	none ->	
+		none;
+	{ok, Value} ->
+		Value
+	end.
+
 %% @doc find an item in cache, and update its internal structure.
 %% @end
 -spec query(
@@ -98,7 +112,7 @@ query(Key, Cache) ->
 		NState = Mod:handle_touch(Key, read, State),
 		{Value, Cache#{state := NState}}
 	end.
-
+	
 %% @doc put an item into cache, and update its internal structure.
 %% @end
 -spec cache(
