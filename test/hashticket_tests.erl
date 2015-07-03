@@ -23,5 +23,5 @@ timeout_test() ->
 	?assert(hashticket:verify(S3)),
 
 	S3F = hashticket:generate("test", 16, 1),
-	timer:sleep(2000),
+	timer:sleep(3000),
 	?assertNot(hashticket:verify(S3F)).
